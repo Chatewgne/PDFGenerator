@@ -12,100 +12,94 @@ using iText.IO.Font.Constants;
 using iText.Layout.Properties;
 using iText.Layout.Borders;
 using iText.Kernel.Colors;
+using System.Threading;
+using System.Diagnostics;
 
 namespace PDFGenerator
 {
     class Program
     {
+
         static void Main(string[] args)
         {
-            //OUTPUT PDF
-            // String dest = Console.ReadLine();
-            //    FileInfo file = new FileInfo(DEST);
-            //   file.Directory.Create();
-            //  new C01E01_HelloWorld().CreatePdf(DEST);
-            Boolean firstCommand = true;
-            PdfWriter writer = new PdfWriter("D:/Projects/PDFtest/helloworld.pdf");
+            //Initialization  
+            //retrieve input file lines on console input
+            string input = Console.ReadLine();
+            string[] lines = File.ReadAllLines(input);
+            //retrieve input file name
+            string file_name = input.Substring(input.LastIndexOf("/")).Split('.')[0];
+            //create output pdf file in the same folder with same name
+            string output = input.Substring(0, input.LastIndexOf("/")+1) + file_name +".pdf";
+            PdfWriter writer = new PdfWriter(new FileStream(output, FileMode.Create));
+            //create objects to write in the pdf file
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
             Paragraph par = new Paragraph();
             PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
             Text text = new Text("");
-            //INPUT TXT
-            string[] lines = File.ReadAllLines("D:/Projects/PDFtest/input.txt");
+
+            //Processing 
+            //Loop for each input line 
+            Boolean firstCommand = true;
             foreach (string line in lines)
             {
-                if (line[0] == '.')
+                if (line[0] == '.') //if this line is a command 
                 {
-                    if (firstCommand)
+                    if (firstCommand) //make sure it's not the second command in a row before appending previous text from the previous loop to the file
                     {
                         firstCommand = false;
                         par.Add(text);
-                    } //TODO explain that my fill and unfill command make new paragraphs /that it doesn't handle "no space" scenario
-                  //  text.SetText(""); 
-                    switch (line) {
+                    } //TODO no space after a command - text on one line - fill comes after indent - /eplxain / not \ explain that my fill and unfill command make new paragraphs /that it doesn't handle "no space" scenario
+                    switch (line)
+                    { //apply changes to paragraph or text according to the command
                         case ".large":
-                            //      par.Add(text);
                             text = new Text("");
                             text.SetFontSize(30.0f);
                             break;
                         case ".normal":
                         case ".regular":
-                            //      par.Add(text);
                             text = new Text("");
                             break;
                         case ".paragraph":
-                      //      par.Add(text);
                             document.Add(par);
                             par = new Paragraph();
                             break;
                         case ".fill":
-                            //        par.Add(text);
                             document.Add(par);
                             par = new Paragraph();
                             par.SetTextAlignment(TextAlignment.JUSTIFIED);
                             break;
                         case ".nofill":
-                            //        par.Add(text);
                             document.Add(par);
                             par = new Paragraph();
                             par.SetTextAlignment(TextAlignment.LEFT);
                             break;
                         case ".italics":
-                      //      par.Add(text);
                             text = new Text("");
                             text.SetItalic();
                             break;
                         case ".bold":
-                       //     par.Add(text);
                             text = new Text("");
                             text.SetBold();
                             break;
-                        case (".indent"): //TODO attention celui ci prend un argument
-
-                   //         par.SetBorderLeft(new DoubleBorder(3.0f).SetColor(new Color());
-                            break;  //TODO what is the .normal one ??
                         default:
-                            Console.WriteLine("Met unknown command : " + line);
+                            if (line.Split(' ')[0].Equals(".indent"))
+                            {
+                                par.SetMarginLeft(float.Parse(line.Split(' ')[1])*10.0f);
+                            }
+                            else { 
+                            Debug.WriteLine("Met unknown command : " + line);
+                            }
                             break; 
 
                     }
                 }
-                else {
-                    if (text == null) {
-                        Console.WriteLine(" !!!! Empty text !!!! ");
-                    }
-                    else {
-                   
-                            text.SetText(line);
-                       
-                        
+                else { 
+                        text.SetText(line); //if not a command, set this line as text 
                         firstCommand = true;
-                    }
                 }
-                // Use a tab to indent each line of the file.
-                Console.WriteLine("\t" + line);
             }
+            //Last step : append the previous text and close file
             par.Add(text);
             document.Add(par);
             document.Close();
