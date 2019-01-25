@@ -40,5 +40,7 @@ Make sure there are no linebreaks in a text entry or some parts might be missing
 
 ## Possible improvements
 I couldn't find a quick easy way to add pagination. 
+
 For the indent command I chose to use the absolute position rather than using the relative position, although it's not exactly what was expected it was easier to implement. 
+
 I didn't refactor my code, but it is quite short and I think it is clear enough as it is.
