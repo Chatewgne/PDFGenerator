@@ -4,6 +4,7 @@
 
 ### [Download zip from release](https://github.com/Chatewgne/PDFGenerator/releases)
 
+OR
 ### Clone from github
 ```
 git clone https://github.com/Chatewgne/PDFGenerator
